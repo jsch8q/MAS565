@@ -130,4 +130,4 @@ for n in n_list:
     plt.legend()
    
 plt.title('Error Plots')
-plt.show()    # Show all plotted graphs 
+plt.show()    # Show all plotted errors
