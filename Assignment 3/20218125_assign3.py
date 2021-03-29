@@ -11,6 +11,11 @@ def interval_length(knots):
     return h
 
 def draw_graph(coeff_matrix, knots):
+    """
+        Plots the computed cubic spline. Not required by 
+        the assignment, but useful to check the results. 
+        Retuns a tuple of abscissae and ordinates. 
+    """
     n = len(knots) - 1
     S = np.array([])
     x = np.array([])
@@ -23,9 +28,14 @@ def draw_graph(coeff_matrix, knots):
             res = res * (xSample - xj) + coeffs[i] 
         x = np.hstack((x, xSample))
         S = np.hstack((S, res))
-    return x, S
+    return (x, S)
             
 def find_idx(knots, z):
+    """
+        Given the list of knots and a target point z, 
+        finds the index j such that z \in [x_j, x_{j+1}]
+        using a variant of the binary search algorithm.
+    """
     n = len(knots) - 1
     if z < knots[0] or z > knots[-1]:
         raise KeyError
@@ -41,7 +51,9 @@ def find_idx(knots, z):
 
 def eval_p(coeff_matrix, knots, z):
     """ 
-       
+        Given the knots and a matrix consisted of coefficients
+        of the cubic spline S on each interval and the knots, 
+        returns the value S(z).
     """
     j = find_idx(knots, z)
     xj = knots[j]
@@ -54,6 +66,11 @@ def eval_p(coeff_matrix, knots, z):
     return res
 
 def error_analysis(f, coeff_matrix, knots, targets):
+    """ 
+        Given f and its spline function S as a matrix of 
+        coefficients, as required in the assignment, computes 
+        the error f - S at the points in the list [targets].
+    """
     errors = 0 * targets
     for i in range(len(targets)):
         z = targets[i]
@@ -63,6 +80,12 @@ def error_analysis(f, coeff_matrix, knots, targets):
     return errors
 
 def moment_relation_scalar(y, h):
+    """
+        In order to compute the spline function, we need to 
+        compute the moments. In the system of linear equations 
+        A*M = d which computes the vector of moments M, this 
+        function constructs the vector d. 
+    """
     n = len(h) - 1
     d = np.zeros(n+1)
     for j in range(1, (n-1)+1):
@@ -73,7 +96,10 @@ def moment_relation_scalar(y, h):
 
 def moment_relation_matrix(h):
     """
-        
+        In order to compute the spline function, we need to 
+        compute the moments. In the system of linear equations 
+        A*M = d which computes the moment vector M, this 
+        function constructs the matrix A. 
     """
     n = len(h) - 1
     A = 2 * np.eye(n+1)
@@ -86,6 +112,13 @@ def moment_relation_matrix(h):
     return A
    
 def compute_coeffs(M, y, h):
+    """
+        From the moments M, ordinates y, and the vector h 
+        containing the lengths of the intervals, this function
+        computes the coefficients of the cubic spline S. The j-th 
+        row of the resulting matrix contains the coefficients of 
+        the cubic polynomial that coincides with S on [x_j, x_{j+1}]. 
+    """
     n = len(h) - 1
     coeff_matrix = np.zeros((n , 4))
     for j in range((n-1)+1):
