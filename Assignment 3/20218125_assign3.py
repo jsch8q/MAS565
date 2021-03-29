@@ -31,7 +31,7 @@ def draw_graph(coeff_matrix, knots):
     return (x, S)
             
 def find_idx(knots, z):
-    """
+    r"""
         Given the list of knots and a target point z, 
         finds the index j such that z \in [x_j, x_{j+1}]
         using a variant of the binary search algorithm.
