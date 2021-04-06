@@ -6,6 +6,7 @@ def gamma_j(j_plus_1):
         $gamma_{j+1}$ defined in the recurrence relation in 
         Theorem 3.6.3. Used in the construction of the 
         tridiagonal matrix $J_n$.
+        We use /j_plus_1/ to make notation consistent with the textbook.
     """
     j = j_plus_1 - 1
     gamma = j / np.sqrt(4*j*j - 1)
@@ -27,10 +28,15 @@ def weights_and_nodes(n):
     """
         Returns the precomputed weights and nodes to be used 
         in the computation of Gaussian Quadrature using weight
-        function 1.
+        function 1. 
     """
     Jn = construct_Jn(n)
     eigval, eigvec = np.linalg.eig(Jn)
+
+    # /eigvec/ is a matrix where the columns are unit norm 
+    # eigenvectors of /Jn/, i-th column corresponding to /eigval[i]/.
+    # The factor 2 comes from the fact that $(p_0, p_0) = 2$.
+
     nodes = eigval
     weights = 2 * np.square(eigvec[0])
     return (weights, nodes)
@@ -41,6 +47,8 @@ def eval_quadrature(f, a, b, n):
         on the interval [/a/, /b/] with the weight function 1.
     """
     if (a, b) != (-1, 1):
+        # It is in general a bad idea to compare two floating point numbers
+        # in this fashion, but here we do so to endorse change of variables.
         g = lambda t: f( (t+1) * (b-a) / 2 + a ) 
         factor = (b-a) / 2
     else :
