@@ -274,3 +274,6 @@ TSWLatexianTemp*
 
 # Makeindex log files
 *.lpz
+
+/Assignment 6/**
+!Assignment 6/**/*.py
