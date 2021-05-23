@@ -1,21 +1,30 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from numpy.testing._private.utils import KnownFailureException
 
 def make_tridiag(main_diag, upper, lower):
+    """
+        Construct a tridiagonal matrix from given three vectors. 
+    """
     res = np.diag(main_diag) + np.diag(upper, 1) + np.diag(lower, -1)
     return res
 
 def make_Tn(n):
+    """
+        Construct T_n as indicated in the assignment. 
+    """
     if n <= 0 :
         raise KeyError
     
-    off_main_diag = [-1 for _ in range(n-1)]
-    upper = np.diag(off_main_diag,  1)
-    lower = np.diag(off_main_diag, -1)
-    return 4*np.eye(n) + upper + lower
+    off_diag = -1 * np.ones(n-1)
+    main_diag = 4 * np.ones(n)
+    res = make_tridiag(main_diag, off_diag, off_diag)
+
+    return res
 
 def make_An(n):
+    """
+        Construct a block matrix A_n as indicated in the assignment. 
+    """
     if n <= 0 :
         raise KeyError
 
@@ -35,15 +44,28 @@ def make_An(n):
     return res    
 
 def make_ej(j, n):
+    """
+        Construct the j-th canonical basis vector in the C^n.
+    """
     res = np.hstack((np.zeros(j-1), [1], np.zeros(n-j)))
     return res
 
 def residual(v, Q):
+    """
+        Compute the residual vector when orthogonally projecting v
+        onto span(Q). In this program we only condsider the case where
+        all columns of Q are orthonormal, so we can simplify our task.
+    """
     # proj = Q @ np.linalg.inv(Q.T @ Q) @ Q.T
     proj = Q @ Q.T
     return v - proj @ v
 
 def vec_transpose(v):
+    """
+        In numpy, vectors are really vectors, that is, they are
+        not the same with n*1 matrices. Therefore, to 'transpose' 
+        a vector we need special treatment. 
+    """
     vT = np.reshape(v.copy(), (-1, 1))
     return vT
 
@@ -91,6 +113,10 @@ while i < n :
     
     if abs(gamma_i) < eps:
         if i <= n:
+            # The Lanczos method has terminated before computing 
+            # the full tridiagonal matrix. We should find a new 
+            # vector which is orthogonal to q_i's computed, in 
+            # order to re-initiate the process. 
             gamma_i = 0
             gamma.append(gamma_i)
             new_q = np.zeros(0)
@@ -103,6 +129,8 @@ while i < n :
             q = new_q / np.linalg.norm(new_q)
             Q = np.hstack((Q, vec_transpose(q)))
         else :
+            # The Lanczos method has terminated with computing 
+            # the full tridiagonal matrix.
             break
     else :
         gamma.append(gamma_i)
@@ -111,6 +139,9 @@ while i < n :
         Q = np.hstack((Q, vec_transpose(q)))
 
 tridiag = make_tridiag(delta, gamma, gamma)
+
+## Task 2-2 : Compute the eigvals of the tridiag matrix and plot them
+
 eigval, _ = np.linalg.eig(tridiag)
 eigval = np.sort(eigval)[::-1]
 
@@ -120,5 +151,7 @@ print("\t", eigval[0])
 print("Maximum eigenvalue computed using internal method eig:")
 print("\t", np.amax(np.linalg.eig(A)[0]))
 
+plt.xlabel("index")
+plt.ylabel("eigenvalues")
 plt.scatter([i for i in range(len(eigval))], eigval, label = "eigenvalues")
 plt.show()
